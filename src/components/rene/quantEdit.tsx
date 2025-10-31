@@ -6,13 +6,9 @@ import { useReneStore } from "@/store/rene";
 import { Button } from "../ui/button";
 
 import { Scale, ChordType } from "tonal";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 import QuantGridBig from "./gridDisplay";
-import { RefreshCcwIcon } from "lucide-react";
 
 export default function ReneQuantEdit({ index, rootNote, type, name }: { index: number, rootNote: string, type: string, name: string }) {
     const { sequence, setSequence } = useReneStore();

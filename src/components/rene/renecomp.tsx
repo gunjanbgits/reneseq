@@ -1,22 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ReneViz from "./reneviz";
+import { useState } from "react";
 import ReneQuantGrid from "./quantGrid";
 import { Button } from "@/components/ui/button";
 import { useReneStore } from "@/store/rene";
-import { PlusIcon, TrashIcon, XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReneQuantEdit from "./quantEdit";
 import {
     Drawer,
     DrawerClose,
     DrawerContent,
-    DrawerDescription,
-    DrawerFooter,
     DrawerHeader,
     DrawerTitle,
-    DrawerTrigger,
 } from "@/components/ui/drawer";
 
 export default function ReneComp() {
