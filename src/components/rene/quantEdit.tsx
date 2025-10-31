@@ -4,7 +4,6 @@
 
 import { useReneStore } from "@/store/rene";
 import { Button } from "../ui/button";
-
 import { Scale, ChordType } from "tonal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
