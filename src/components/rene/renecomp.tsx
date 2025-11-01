@@ -32,14 +32,14 @@ export default function ReneComp() {
         <>
             <div className="w-full p-4">
                 <div
-                    className="flex flex-wrap gap-2"
+                    className="flex flex-wrap gap-x-2 gap-y-4 md:gap-y-8 max-w-[19rem] md:max-w-2xl mx-auto"
                     onClick={() => setActiveIndex(null)}
                 >
                     {sequence.map((seq, index) => (
                         <div
                             key={index}
                             className={cn(
-                                "cursor-pointer p-0 flex flex-col items-center justify-center"
+                                "cursor-pointer p-0 flex flex-col justify-start"
                             )}
                         >
                             <ReneQuantGrid
@@ -51,15 +51,15 @@ export default function ReneComp() {
                                     setActiveIndex(index);
                                 }}
                             />
-                            <div className="flex flex-row items-top justify-between capitalize w-24 pt-0">
-                                <p className="text-[9px] text-neutral-400 text-wrap pt-1.5">
+                            <div className="flex flex-row items-top justify-between capitalize w-24 md:w-32 pt-0">
+                                <p className="text-[9px] md:text-[13px] text-neutral-400 text-wrap pt-1.5">
                                     {seq.rootNote} {seq.name}
                                 </p>
                                 <div>
                                     <Button
                                         variant="ghost"
                                         size="icon-sm"
-                                        className="w-6 h-6 cursor-pointer text-neutral-500"
+                                        className="w-6 h-6 md:w-8 md:h-8 cursor-pointer text-neutral-500 md:text-[20px]"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             deleteGridButton(index);
@@ -132,11 +132,11 @@ function AddGridButton({
     };
 
     return (
-        <div className="flex flex-col items-center justify-center w-24 h-24 border border-neutral-800 hover:border-neutral-700 transition-colors">
+        <div className="flex flex-col items-center justify-center w-24 h-24 md:w-32 md:h-32 border border-neutral-800 hover:border-neutral-700 transition-colors">
             <Button
                 variant="ghost"
                 size="icon-sm"
-                className="cursor-pointer w-24 h-24"
+                className="cursor-pointer w-24 h-24 md:w-32 md:h-32"
                 onClick={addNewSequence}
             >
                 <div className="text-[24px] text-neutral-400">+</div>

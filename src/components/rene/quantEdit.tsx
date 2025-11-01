@@ -181,7 +181,7 @@ function ChordTypeSelector({ chordType, setChordType }: { chordType: string, set
         <div className="flex flex-wrap gap-1">
             {chordTypeDetails.map((typeDetail) => (
                 <Button 
-                    className="cursor-pointer capitalize whitespace-nowrap" 
+                    className="cursor-pointer whitespace-nowrap" 
                     variant={(chordType === typeDetail.name ? "destructive" : "outline")} 
                     key={typeDetail.name} 
                     size="sm"

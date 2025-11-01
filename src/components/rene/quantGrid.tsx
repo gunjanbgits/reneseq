@@ -61,9 +61,9 @@ export default function ReneQuantGrid({ rootNote, name, type, onClick }: { rootN
     return (
         <div onClick={onClick}>
             <div className="flex flex-col items-center justify-top gap-2">
-                <div className="flex flex-wrap-reverse gap-0 w-24 h-24">
+                <div className="flex flex-wrap-reverse gap-0 w-24 h-24 md:w-32 md:h-32">
                     {labels.map((note, index) => (
-                        <div key={index} className="w-6 h-6">
+                        <div key={index} className="w-6 h-6 md:w-8 md:h-8">
                             <Step root={rootNote} count={index + 1} note={note} active={isNoteActive(note, activeNotes)} />
                         </div>
                     ))}
