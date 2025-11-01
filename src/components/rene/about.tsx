@@ -22,7 +22,7 @@ export function Information() {
           </DialogHeader>
           <div className="text-sm text-neutral-200 text-center">
             <p className="mb-2">
-            René Quant is a small tool built for exploring scales, chords, and pattern mappings for the Make Noise René 2 and similar Cartesian sequencers.
+            René Quant is a small utility built for exploring scales, chords, and pattern mappings for the Make Noise René 2 and similar Cartesian sequencers.
             </p>
             <p className="mb-2">
             It is an independent creative tool intended for personal and educational use.
@@ -33,11 +33,11 @@ export function Information() {
             </p>
           </div>
           <div className="text-center flex flex-row items-center justify-between border-t border-neutral-800 pt-4">
-            <p className="text-[10px] text-neutral-400">
+            <p className="text-[12px] text-neutral-400">
                 Made by <a href="https://gunjanb.space" className="text-neutral-300" target="_blank">GunjanB</a>
             </p>
-            <p className="text-[10px] text-neutral-400">
-                <a href="https://github.com/GunjanB/reneseq" className="text-neutral-300" target="_blank">GitHub</a>
+            <p className="text-[12px] text-neutral-400">
+                <a href="https://github.com/gunjanbgits/reneseq" className="text-neutral-300" target="_blank">GitHub</a>
             </p>
           </div>
           <DialogFooter className="hidden">
