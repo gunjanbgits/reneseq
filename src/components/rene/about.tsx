@@ -13,7 +13,7 @@ import {
 export function Information() {
   return (
     <Dialog>
-        <DialogTrigger className="cursor-pointer fixed top-4 right-2 z-50" asChild>
+        <DialogTrigger className="cursor-pointer fixed top-8 right-3 z-50" asChild>
           <Button variant="secondary" size="icon-sm">і</Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">

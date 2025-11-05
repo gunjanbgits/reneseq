@@ -6,15 +6,21 @@ import { useReneStore } from "@/store/rene";
 import { Button } from "../ui/button";
 import { Scale, ChordType } from "tonal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import QuantGridBig from "./gridDisplay";
 
-export default function ReneQuantEdit({ index, rootNote, type, name }: { index: number, rootNote: string, type: string, name: string }) {
+export default function ReneQuantEdit({ index, rootNote, type, name }: { index: number, rootNote: string | null, type: string | null, name: string | null }) {
     const { sequence, setSequence } = useReneStore();
+    const isClearingRef = useRef(false);
     
-    const [rootNoteValue, setRootNoteValue] = useState(rootNote);
-    const [tab, setTab] = useState(type === "chord" ? "chords" : "scales");
-    const [seqName, setSeqName] = useState(name);
+    // Default values when starting with null
+    const defaultRootNote = rootNote ?? null;
+    const defaultType = type || "scale";
+    const defaultName = name ?? null;
+    
+    const [rootNoteValue, setRootNoteValue] = useState<string | null>(defaultRootNote);
+    const [tab, setTab] = useState(defaultType === "chord" ? "chords" : "scales");
+    const [seqName, setSeqName] = useState<string | null>(defaultName);
 
     // Handle tab changes - set appropriate default values
     const handleTabChange = (newTab: string) => {
@@ -30,21 +36,63 @@ export default function ReneQuantEdit({ index, rootNote, type, name }: { index: 
 
     // Sync local state when props change (when switching to a different sequence)
     useEffect(() => {
-        setRootNoteValue(rootNote);
-        setTab(type === "chord" ? "chords" : "scales");
-        setSeqName(name);
+        const newRootNote = rootNote ?? null;
+        const newTab = (type || "scale") === "chord" ? "chords" : "scales";
+        const newSeqName = name ?? null;
+        
+        setRootNoteValue(newRootNote);
+        setTab(newTab);
+        setSeqName(newSeqName);
     }, [index, rootNote, type, name]);
 
-    // Auto-update sequence when any value changes
+    // Auto-update sequence when any value changes (skip if we just cleared)
     useEffect(() => {
-        updateSequence();
+        if (!isClearingRef.current) {
+            updateSequence();
+        } else {
+            // Reset the flag after skipping one update
+            isClearingRef.current = false;
+        }
     }, [rootNoteValue, tab, seqName]);
 
+    function clearSequence() {
+        // Set flag to skip the next updateSequence call
+        isClearingRef.current = true;
+        // Reset local state to null so nothing is selected
+        setRootNoteValue(null);
+        setTab("scales");
+        setSeqName(null);
+        // Clear only the current sequence at the active index
+        const currentSequence = sequence.length === 16 ? sequence : [
+            ...sequence,
+            ...Array(16 - sequence.length).fill(null).map(() => ({
+                type: null,
+                name: null,
+                rootNote: null
+            }))
+        ];
+        setSequence(currentSequence.map((seq, i) => i === index ? {
+            type: null,
+            name: null,
+            rootNote: null
+        } : seq));
+    }
+
     function updateSequence() {
-        setSequence(sequence.map((seq, i) => i === index ? { 
+        // Ensure we always have exactly 16 sequences
+        const currentSequence = sequence.length === 16 ? sequence : [
+            ...sequence,
+            ...Array(16 - sequence.length).fill(null).map(() => ({
+                type: null,
+                name: null,
+                rootNote: null
+            }))
+        ];
+        
+        setSequence(currentSequence.map((seq, i) => i === index ? { 
             ...seq, 
             rootNote: rootNoteValue, 
-            type: tab === "scales" ? "scale" : "chord", 
+            type: (rootNoteValue === null && seqName === null) ? null : (tab === "scales" ? "scale" : "chord"), 
             name: seqName 
         } : seq));
     }
@@ -53,27 +101,30 @@ export default function ReneQuantEdit({ index, rootNote, type, name }: { index: 
         <div className="flex flex-col large:flex-row">
             <div className="flex flex-col gap-2">
                 <div className="flex flex-col items-center justify-center mt-2">
-                    <QuantGridBig rootNote={rootNoteValue} name={seqName} type={tab === "scales" ? "scale" : "chord"} />
+                    <QuantGridBig rootNote={rootNoteValue} name={seqName || ""} type={tab === "scales" ? "scale" : "chord"} setRootNote={setRootNoteValue} />
                 </div>
-                <div className="flex flex-row justify-center items-center">
+                {/* <div className="flex flex-row justify-center items-center">
                     <RootNoteSelector rootNote={rootNoteValue} setRootNote={setRootNoteValue} />
-                </div>
+                </div> */}
                 <Tabs className="w-full pt-2" defaultValue={tab} onValueChange={handleTabChange}>
                     <TabsList className="w-full">
                         <TabsTrigger value="scales">Scales</TabsTrigger>
                         <TabsTrigger value="chords">Chords</TabsTrigger>
                     </TabsList>
                     <TabsContent value="scales">
-                        <ScaleTypeSelector scaleType={tab === "scales" ? seqName : "major"} setScaleType={setSeqName} />
+                        <ScaleTypeSelector scaleType={tab === "scales" ? (seqName ?? null) : null} setScaleType={setSeqName} />
                     </TabsContent>
                     <TabsContent value="chords">
-                        <ChordTypeSelector chordType={tab === "chords" ? seqName : "major"} setChordType={setSeqName} />
+                        <ChordTypeSelector chordType={tab === "chords" ? (seqName ?? null) : null} setChordType={setSeqName} />
                     </TabsContent>
                 </Tabs>
             </div>
-            <div className="mt-0 absolute top-2 left-2 z-50">
-                    <Button onClick={updateSequence} size="icon" className="cursor-pointer text-neutral-400" variant="secondary">
-                    ✧
+            <div className="mt-0 absolute top-2 left-0 z-50">
+                    {/* <Button onClick={updateSequence} size="icon" className="cursor-pointer text-neutral-400" variant="secondary">
+                    [ REFRESH ]
+                    </Button> */}
+                    <Button onClick={clearSequence}  className="cursor-pointer text-neutral-400 hover:text-neutral-100 text-[10px] px-2" variant="secondary">
+                    [ CLEAR ]
                     </Button>
             </div>
         </div>
@@ -82,7 +133,7 @@ export default function ReneQuantEdit({ index, rootNote, type, name }: { index: 
 
 
 
-function RootNoteSelector({ rootNote, setRootNote }: { rootNote: string, setRootNote: (rootNote: string) => void }) {
+function RootNoteSelector({ rootNote, setRootNote }: { rootNote: string | null, setRootNote: (rootNote: string | null) => void }) {
     const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
     const blackKeys = [
         { note: 'C#/Db', after: 'C' },
@@ -132,7 +183,7 @@ function RootNoteSelector({ rootNote, setRootNote }: { rootNote: string, setRoot
     );
 }
 
-function ScaleTypeSelector({ scaleType, setScaleType }: { scaleType: string, setScaleType: (scaleType: string) => void }) {
+function ScaleTypeSelector({ scaleType, setScaleType }: { scaleType: string | null, setScaleType: (scaleType: string | null) => void }) {
     const scaleTypes = ['major', 'minor', 'pentatonic', 'harmonic minor', 'harmonic major', 'melodic minor', 'melodic major', 'diminished', 'augmented'];
     const interestingScales = [
         "major",
@@ -163,10 +214,10 @@ function ScaleTypeSelector({ scaleType, setScaleType }: { scaleType: string, set
     );
 }
 
-function ChordTypeSelector({ chordType, setChordType }: { chordType: string, setChordType: (chordType: string) => void }) {
+function ChordTypeSelector({ chordType, setChordType }: { chordType: string | null, setChordType: (chordType: string | null) => void }) {
 
     const chordTypeAll = ChordType.names();
-    
+    // console.log(chordTypeAll);
     // Create chord type details with aliases for display
     const chordTypeDetails = chordTypeAll.map(typeName => {
         const ct = ChordType.get(typeName);
@@ -182,7 +233,7 @@ function ChordTypeSelector({ chordType, setChordType }: { chordType: string, set
             {chordTypeDetails.map((typeDetail) => (
                 <Button 
                     className="cursor-pointer whitespace-nowrap" 
-                    variant={(chordType === typeDetail.name ? "destructive" : "outline")} 
+                    variant={(chordType === typeDetail.name || chordType === typeDetail.aliases[0] ? "destructive" : "outline")} 
                     key={typeDetail.name} 
                     size="sm"
                     onClick={() => setChordType(typeDetail.name)}

@@ -71,7 +71,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-neutral-900">
+    <html lang="en" className="dark bg-neutral-900 overscroll-none">
       <body
         className={` ${departureMono.variable} antialiased font-mono dark bg-neutral-900`}
       >

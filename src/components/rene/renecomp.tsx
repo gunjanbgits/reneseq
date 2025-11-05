@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ReneQuantGrid from "./quantGrid";
 import { Button } from "@/components/ui/button";
-import { useReneStore } from "@/store/rene";
+import { useReneStore, useRenePresets } from "@/store/rene";
 import { cn } from "@/lib/utils";
 import ReneQuantEdit from "./quantEdit";
 import {
@@ -13,33 +13,34 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "@/components/ui/drawer";
+import { ChordType } from "tonal";
 
 export default function ReneComp() {
     const { sequence, setSequence } = useReneStore();
     const [activeIndex, setActiveIndex] = useState<number | null>(null);
-    // console.log(activeIndex);
-    const deleteGridButton = (index: number) => {
-        setSequence(sequence.filter((_, i) => i !== index));
-        // Reset active index if we deleted the active sequence
-        if (activeIndex === index) {
-            setActiveIndex(null);
-        } else if (activeIndex !== null && activeIndex > index) {
-            // Adjust active index if we deleted a sequence before the active one
-            setActiveIndex(activeIndex - 1);
-        }
-    };
+    const { reneseqPresets, setReneseqPresets } = useRenePresets();
+    
+    // Ensure we always have exactly 16 sequences
+    const displaySequence = sequence.length === 16 ? sequence : [
+        ...sequence,
+        ...Array(16 - sequence.length).fill(null).map(() => ({
+            type: null,
+            name: null,
+            rootNote: null
+        }))
+    ];
     return (
         <>
-            <div className="w-full p-4">
+            <div className="w-full p-0">
                 <div
-                    className="flex flex-wrap gap-x-2 gap-y-4 md:gap-y-8 max-w-[19rem] md:max-w-2xl mx-auto"
+                    className="grid grid-cols-4 grid-rows-4 gap-4 md:gap-4 max-w-[23rem] md:max-w-[35rem] mx-auto"
                     onClick={() => setActiveIndex(null)}
                 >
-                    {sequence.map((seq, index) => (
+                    {displaySequence.map((seq, index) => (
                         <div
                             key={index}
                             className={cn(
-                                "cursor-pointer p-0 flex flex-col justify-start"
+                                "cursor-pointer p-0 flex flex-col justify-start items-center h-20 md:h-32"
                             )}
                         >
                             <ReneQuantGrid
@@ -51,27 +52,14 @@ export default function ReneComp() {
                                     setActiveIndex(index);
                                 }}
                             />
-                            <div className="flex flex-row items-top justify-between capitalize w-24 md:w-32 pt-0">
-                                <p className="text-[9px] md:text-[13px] text-neutral-400 text-wrap pt-1.5">
-                                    {seq.rootNote} {seq.name}
+                            <div className="flex flex-row items-center justify-center w-20 md:w-32">
+                                <p className="text-[9px] text-neutral-400 text-nowrap pt-0">
+                                    {seq.rootNote && seq.name ? `${seq.rootNote} ${seq.name}` : ''}
+                                    {/* {seq.type === 'chord' ? ` [ ${seq.name} ]` : ''} */}
                                 </p>
-                                <div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon-sm"
-                                        className="w-6 h-6 md:w-8 md:h-8 cursor-pointer text-neutral-500 md:text-[20px]"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteGridButton(index);
-                                        }}
-                                    >
-                                        ×
-                                    </Button>
-                                </div>
                             </div>
                         </div>
                     ))}
-                    <AddGridButton setActiveIndex={setActiveIndex} />
                 </div>
                 <Drawer
                     open={activeIndex !== null}
@@ -82,29 +70,30 @@ export default function ReneComp() {
                     }}
                 >
                     <DrawerContent className="bg-neutral-900 rounded-none">
-                        <DrawerClose className="absolute top-2 right-2 z-50" asChild>
+                        <DrawerClose className="absolute top-2 right-0 z-50" asChild>
                             <Button
                                 variant="secondary"
-                                size="icon"
-                                className="cursor-pointer"
+                                className="cursor-pointer text-neutral-400 hover:text-neutral-100 text-[10px] px-2"
                             >
-                                ×
+                                [ CLOSE ]
                             </Button>
                         </DrawerClose>
                         <DrawerHeader className="flex-row items-center justify-center h-4 py-4">
                             <DrawerTitle className="hidden text-center text-[8px] capitalize">
                                 {activeIndex !== null &&
-                                    sequence[activeIndex] &&
-                                    `${sequence[activeIndex].rootNote} ${sequence[activeIndex].name}`}
+                                    displaySequence[activeIndex] &&
+                                    displaySequence[activeIndex].rootNote &&
+                                    displaySequence[activeIndex].name &&
+                                    `${displaySequence[activeIndex].rootNote} ${displaySequence[activeIndex].name}`}
                             </DrawerTitle>
                         </DrawerHeader>
-                        {activeIndex !== null && sequence[activeIndex] && (
+                        {activeIndex !== null && displaySequence[activeIndex] && (
                             <div className="pb-16 px-2 max-w-lg mx-auto overflow-y-auto">
                                 <ReneQuantEdit
                                     index={activeIndex}
-                                    rootNote={sequence[activeIndex].rootNote}
-                                    type={sequence[activeIndex].type}
-                                    name={sequence[activeIndex].name}
+                                    rootNote={displaySequence[activeIndex].rootNote}
+                                    type={displaySequence[activeIndex].type}
+                                    name={displaySequence[activeIndex].name}
                                 />
                             </div>
                         )}
@@ -115,32 +104,3 @@ export default function ReneComp() {
     );
 }
 
-function AddGridButton({
-    setActiveIndex,
-}: {
-    setActiveIndex: (index: number) => void;
-}) {
-    const { sequence, setSequence } = useReneStore();
-
-    const addNewSequence = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const newSequence = { name: "major", rootNote: "C", type: "scale" };
-        const newIndex = sequence.length;
-        setSequence([...sequence, newSequence]);
-        // Auto-select the newly added sequence for immediate editing
-        setActiveIndex(newIndex);
-    };
-
-    return (
-        <div className="flex flex-col items-center justify-center w-24 h-24 md:w-32 md:h-32 border border-neutral-800 hover:border-neutral-700 transition-colors">
-            <Button
-                variant="ghost"
-                size="icon-sm"
-                className="cursor-pointer w-24 h-24 md:w-32 md:h-32"
-                onClick={addNewSequence}
-            >
-                <div className="text-[24px] text-neutral-400">+</div>
-            </Button>
-        </div>
-    );
-}

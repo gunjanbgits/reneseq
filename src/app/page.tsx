@@ -1,11 +1,15 @@
 import ReneComp from "@/components/rene/renecomp";
 import { Information } from "@/components/rene/about";
+import { PresetSelector } from "@/components/rene/presetSelector";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-top justify-center bg-neutral-50 font-sans dark:bg-neutral-900 pt-16 md:pt-24">
+    <div className="flex items-top justify-center bg-neutral-50 font-sans dark:bg-neutral-900 pt-24">
       <Information />
-      <ReneComp />
+      <div className="flex flex-col items-center justify-center">
+        <PresetSelector />
+        <ReneComp />
+      </div>
     </div>
   );
 }
